@@ -81,7 +81,7 @@
             margin: 0 auto;
         }
 
-        /* App Header */
+        /* App Header Navigation */
         .app-header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -141,6 +141,34 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface-subtle);
+            padding: 4px;
+            border-radius: 9px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            font: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--ink-secondary);
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .tab-btn.active {
+            background: var(--brand);
+            color: var(--brand-ink);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
         }
 
         /* Print System Selector Toggle */
@@ -254,7 +282,7 @@
             font-size: 12px;
         }
 
-        /* Form Inputs & Grid Columns */
+        /* Form Inputs */
         .form-row {
             display: grid;
             grid-template-columns: 1fr;
@@ -299,7 +327,7 @@
         .text-input, .select-input {
             font: inherit;
             font-size: 14px;
-            padding: 10px 12px;
+            padding: 9px 12px;
             border: 1px solid var(--border-strong);
             border-radius: var(--radius-sm);
             background: var(--surface);
@@ -313,7 +341,7 @@
             box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
         }
 
-        /* Sliders */
+        /* Sliders (ปุ่มสไลด์) */
         .slider-row {
             display: grid;
             grid-template-columns: 1fr 110px;
@@ -571,6 +599,19 @@
         }
 
         /* Printable Quotation Paper stylesheet */
+        .quote-toolbar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
         .quote-paper {
             background: #ffffff;
             border: 1px solid var(--border-strong);
@@ -636,7 +677,40 @@
             margin-bottom: 8px;
         }
 
-        /* Action Buttons */
+        .inline-feedback {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+            }
+            .app-header, .formula-bar, .system-toggle-wrap, .quote-toolbar, .no-print {
+                display: none !important;
+            }
+            .container {
+                padding: 0;
+                max-width: 100%;
+            }
+            .view-section {
+                display: none !important;
+            }
+            #view-quotation {
+                display: block !important;
+            }
+            .quote-paper {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+        }
+
+        /* Styled Action Buttons */
         .btn-action { width: 100%; padding: 11px; border: none; border-radius: var(--radius-md); font-weight: 600; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
         .btn-copy { background: var(--pill-active-bg); color: var(--pill-active-text); }
         .btn-copy:hover { opacity: 0.9; }
@@ -668,7 +742,7 @@
             padding: 12px 16px;
             border-radius: var(--radius-md);
             margin-bottom: 16px;
-            line-height: 1.7; /* Increased line-height/spacing as requested */
+            line-height: 1.7; /* Increased line-height/spacing as requested (2.0 line-height / beautiful spacings) */
         }
 
         .inline-feedback {
@@ -794,6 +868,10 @@
             </div>
 
             <div class="header-actions">
+                <nav class="nav-tabs" aria-label="เมนูหลัก">
+                    <button type="button" class="tab-btn active" data-tab="view-estimator">1. ประเมินราคา &amp; ขั้นบันได</button>
+                    <button type="button" class="tab-btn" data-tab="view-quotation">2. ตัวอย่างใบเสนอราคา (Quotation Preview)</button>
+                </nav>
                 <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">
                     🌙 Dark Mode
                 </button>
@@ -1065,6 +1143,115 @@
             </aside>
         </div>
     </div>
+
+
+    <!-- TAB 2: OFFICIAL QUOTATION -->
+    <div id="view-quotation" class="view-section">
+        <div class="quote-toolbar no-print">
+            <div>
+                <strong style="font-size: 15px;">หน้าเอกสารพรีวิวใบเสนอราคาแบบเป็นทางการ</strong>
+                <p style="font-size: 12.5px; color: var(--muted); margin-top:2px;">ข้อมูลสเปก สี ขนาด และตารางราคาขั้นบันไดจะอัปเดตแบบอัตโนมัติ</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-secondary" onclick="document.querySelectorAll('.tab-btn')[0].click()">← กลับไปแก้ไขสเปก</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ สั่งพิมพ์ใบเสนอราคา / บันทึก PDF</button>
+            </div>
+        </div>
+
+        <div class="quote-paper">
+            <div class="q-header">
+                <div>
+                    <h2 class="q-title">ใบเสนอราคาอย่างเป็นทางการ / QUOTATION</h2>
+                    <div style="font-weight:700; margin-top:6px; font-size:15px;">สยามพริ้นติ้ง แอนด์ คอนเวอร์ติ้ง แพคเกจจิ้ง (ข้อมูลจำลอง)</div>
+                    <div class="field-desc" style="margin-top:2px;">123 ซอยอ่อนนุช สุขุมวิท 77 สวนหลวง กรุงเทพฯ 10250 · โทร. 02-789-xxxx</div>
+                </div>
+                <div style="text-align: right; font-size: 13.5px;">
+                    <div><strong>วันที่ประเมินราคา:</strong> <span id="printDate">-</span></div>
+                    <div><strong>ระยะเวลายืนราคา:</strong> 30 วันนับจากวันที่ออกเอกสาร</div>
+                </div>
+            </div>
+
+            <div class="q-meta-grid">
+                <div class="q-meta-card">
+                    <div style="font-size:12px; color:var(--muted); font-weight:700;">เสนอต่อ (CUSTOMER INFORMATION)</div>
+                    <div style="font-size:15.5px; font-weight:700; margin-top:4px; color:var(--brand);" id="printClient">-</div>
+                    <div style="margin-top:4px; font-size:13px;">
+                        ชื่อผู้ประสานงาน: <span id="printContact">-</span> | เบอร์ติดต่อ: <span id="printPhone">-</span>
+                    </div>
+                </div>
+                <div class="q-meta-card">
+                    <div style="font-size:12px; color:var(--muted); font-weight:700;">รายละเอียดทางเทคนิค (PRODUCTION SPECIFICATIONS)</div>
+                    <div style="margin-top:4px; font-size:13px; line-height:1.5;">
+                        <div>ระบบจัดพิมพ์: <strong id="printSystemText">-</strong></div>
+                        <div>วัสดุกระดาษและฟิล์ม: <strong id="printMaterialText">-</strong></div>
+                        <div>ขนาดชิ้นงานสำเร็จ: <strong id="printSizeText">-</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="font-size:14.5px; margin: 0 0 10px; color:var(--brand); font-weight:700;">1. รายการแสดงราคาเสนอขายสัญญารอบการผลิตหลัก (Primary Order Item)</h3>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">รายการและรายละเอียดสเปกการผลิตสินค้าสำเร็จ</th>
+                            <th class="num-align">จำนวนผลิต</th>
+                            <th class="num-align">ราคาเฉลี่ยต่อหน่วย (฿)</th>
+                            <th class="num-align">ราคารวมก่อนภาษี (฿)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong id="printMaterialText_main">-</strong>
+                                <div class="field-desc" style="margin-top:4px;">จำนวนสีพิมพ์รวมสำเร็จ: <span id="printColorText">-</span> | ผ่านงานเคลือบแปรรูปและบริการเสริม</div>
+                            </td>
+                            <td class="num-align" id="printQtyText">-</td>
+                            <td class="num-align" id="resCustomPerUnit_main">-</td>
+                            <td class="num-align" style="font-weight:700;" id="resCustomTotalPrice_main">-</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" style="border:none;"></td>
+                            <td class="num-align" style="font-weight:600;">รวมราคาก่อนภาษีมูลค่าเพิ่ม</td>
+                            <td class="num-align" style="font-weight:600;" id="resCustomTotalPrice_foot">-</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="border:none;"></td>
+                            <td class="num-align" style="font-weight:600;">ภาษีมูลค่าเพิ่ม (VAT 7%)</td>
+                            <td class="num-align" style="font-weight:600;" id="resVatAmount_foot">-</td>
+                        </tr>
+                        <tr class="row-active" style="background:var(--brand-soft); color:var(--brand);">
+                            <td colspan="2" style="border:none;"></td>
+                            <td class="num-align" style="font-size:14px; font-weight:700;">ยอดเงินสุทธิรวมทั้งสิ้น (บาท)</td>
+                            <td class="num-align" style="font-size:15px; font-weight:800;" id="resGrandTotal_foot">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div style="font-size: 12px; color: var(--muted); background: #f8fafc; border: 1px solid var(--border); padding: 12px 16px; border-radius: 8px; line-height: 1.6;">
+                <strong>ข้อกำหนดและเงื่อนไขโรงพิมพ์:</strong><br>
+                - ราคาดังกล่าวได้คำนวณรวมค่าบริหารงานคนงาน ค่าน้ำไฟตั้งเครื่อง และค่าจัดส่งโลจิสติกส์เรียบร้อยแล้ว<br>
+                - กำหนดชำระเงิน: มัดจำค่าโมแม่พิมพ์/บล็อกสลัก 100% และค่ามัดจำสินค้า 50% ก่อนเริ่มผลิต ส่วนที่เหลือชำระวันจัดส่งสินค้า<br>
+                - กำหนดจัดส่ง: ภายใน 7-10 วันทำการภายหลังลูกค้ายืนยันความถูกต้องของไฟล์แบบพิมพ์อาร์ตเวิร์กเป็นที่เรียบร้อย
+            </div>
+
+            <div class="q-sign-box">
+                <div>
+                    <div class="q-sign-line"></div>
+                    <strong>ผู้สั่งจ้าง / ผู้อนุมัติจ้างผลิตจริง</strong>
+                    <div class="field-desc" style="margin-top:4px;">วันที่ ........../........../..........</div>
+                </div>
+                <div>
+                    <div class="q-sign-line"></div>
+                    <strong>ฝ่ายขายและฝ่ายประเมินต้นทุนเทคนิค</strong>
+                    <div class="field-desc" style="margin-top:4px;">วันที่ ........../........../..........</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1083,7 +1270,7 @@
             ],
             gravure: [
                 { id: "tipping", name: "ราคากลางกลุ่มกระดาษม้วน (Tipping)", price: 9215.00, unit: "ม้วน", rollWidthCm: 57, rollMeters: 8500 },
-                { id: "art_roll", name: "ราคากลางกลุ่มกระดาษม้วน (อาร์ต)", price: 21000.00, unit: "ม้วน", rollWidthCm: 108, rollMeters: 8300 },
+                { id: "art_roll", name: "ราคากลางกลุ่มกระดาษม้วน (อาร์ต)", price: 27000.00, unit: "ม้วน", rollWidthCm: 108, rollMeters: 8300 },
                 { id: "bond70_roll", name: "ราคากลางกลุ่มกระดาษม้วน (ปอนด์70)", price: 24151.00, unit: "ม้วน", rollWidthCm: 109.2, rollMeters: 8000 },
                 { id: "bond80_roll", name: "ราคากลางกลุ่มกระดาษม้วน (ปอนด์80)", price: 17710.00, unit: "ม้วน", rollWidthCm: 109.2, rollMeters: 8000 },
                 { id: "craft_roll", name: "ราคากลางกลุ่มกระดาษม้วน (คราฟท์)", price: 20777.00, unit: "ม้วน", rollWidthCm: 92.7, rollMeters: 8000 },
@@ -1098,7 +1285,7 @@
                 laborRatePerHour: 508           // บาท/ชั่วโมง
             },
             gravure: {
-                cylinderCostPerColor: 2800,     // แก้ไขจาก 0 เป็น 2,800 เพื่อป้องกันข้อผิดพลาดการคำนวณราคา Gravure
+                cylinderCostPerColor: 2800,     // แกะสลักโมสลักสีเริ่มต้นกราเวียร์
                 speedMetersPerHour: 12000,      // 12000 เมตร/ชั่วโมง
                 electricityCostPerDay: 1000,    // บาท/วัน (8 ชม. = 125 บาท/ชม.)
                 laborRatePerHour: 508           // บาท/ชั่วโมง
