@@ -1,2 +1,0 @@
-# PrintQuote-Formula-Studio
-PrintQuote
