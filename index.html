@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Estimator - ระบบประเมินราคาโรงพิมพ์และบรรจุภัณฑ์อัจฉริยะ</title>
+    <!-- Google Fonts: Prompt & Sarabun -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Enterprise Color Palette (Type 1 Styled) */
+            --bg-paper: #f8fafc;
+            --surface: #ffffff;
+            --surface-subtle: #f1f5f9;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --ink: #0f172a;
+            --ink-secondary: #334155;
+            --muted: #64748b;
+            
+            --brand: #1e40af;
+            --brand-hover: #1e3a8a;
+            --brand-soft: #eff6ff;
+            --brand-border: #bfdbfe;
+            --brand-ink: #ffffff;
+            
+            --accent: #0284c7;
+            --accent-soft: #e0f2fe;
+            --success: #059669;
+            --success-soft: #ecfdf5;
+            --warning: #d97706;
+            --warning-soft: #fffbeb;
+            --danger: #dc2626;
+            --danger-soft: #fef2f2;
+            
+            --radius-md: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 4px 12px rgba(15, 23, 42, 0.04);
+            --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+            --font-family: "Sarabun", "Prompt", sans-serif;
+        }
+
+        /* Dark Mode Colors */
+        [data-theme="dark"] {
+            --bg-paper: #090d16;
+            --surface: #131c2e;
+            --surface-subtle: #0f172a;
+            --border: #1e293b;
+            --border-strong: #334155;
+            --ink: #f8fafc;
+            --ink-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --brand: #38bdf8;
+            --brand-hover: #0ea5e9;
+            --brand-soft: rgba(56, 189, 248, 0.12);
+            --brand-border: #334155;
+            --accent-green: #34d399;
+            --accent-green-bg: #022c22;
+            --accent-amber: #fbbf24;
+            --shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-paper);
+            color: var(--ink);
+            padding: 24px 16px;
+            font-size: 14.5px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* App Header */
+        .app-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            margin-bottom: 24px;
+            border-radius: var(--radius);
+        }
+
+        .header-inner {
+            padding: 16px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--brand), var(--accent));
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--ink);
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-text p {
+            margin: 2px 0 0;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Print System Selector Toggle */
+        .system-toggle-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .system-toggle {
+            display: inline-flex;
+            background: var(--surface);
+            border: 2px solid var(--border-strong);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+            box-shadow: var(--shadow);
+        }
+
+        .system-btn {
+            font: inherit;
+            font-size: 14.5px;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .system-btn-offset {
+            background: transparent;
+            color: var(--ink-secondary);
+        }
+
+        .system-btn-offset.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        .system-btn-gravure {
+            background: transparent;
+            color: var(--ink-secondary);
+        }
+
+        .system-btn-gravure.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Estimator Grid layout */
+        .estimator-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (min-width: 1024px) {
+            .estimator-grid {
+                grid-template-columns: 7fr 5fr;
+            }
+        }
+
+        /* Card Box Panel */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-header-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .card-heading {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .heading-pill {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--brand-soft);
+            color: var(--brand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* Form Inputs & Grid Columns */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 640px) {
+            .form-row.cols-2 {
+                grid-template-columns: 1fr 1fr;
+            }
+            .form-row.cols-3 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            /* Custom row where 2nd box (ชื่อผู้ติดต่อ) is 25% wider and aligned perfectly */
+            .form-row.custom-customer-row {
+                grid-template-columns: 4fr 5fr; /* 5fr is 1.25 times larger than 4fr (25% wider) */
+            }
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-label {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .field-desc {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .text-input, .select-input {
+            font: inherit;
+            font-size: 14px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--ink);
+            width: 100%;
+        }
+
+        .text-input:focus, .select-input:focus {
+            outline: none;
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
+        }
+
+        /* Sliders */
+        .slider-row {
+            display: grid;
+            grid-template-columns: 1fr 110px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .range-input {
+            width: 100%;
+            accent-color: var(--brand);
+            cursor: pointer;
+        }
+
+        /* Post-press checkboxes check-grid */
+        .check-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .check-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+            background: var(--surface-subtle);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            color: var(--ink-secondary);
+            user-select: none;
+        }
+
+        .check-card input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--brand);
+        }
+
+        /* Cost proportions bar (สัดส่วนต้นทุน) */
+        .cost-bar-wrap {
+            margin-bottom: 20px;
+        }
+
+        .cost-bar {
+            height: 12px;
+            border-radius: 999px;
+            background: var(--border);
+            overflow: hidden;
+            display: flex;
+            margin: 8px 0;
+        }
+
+        .seg-material { background: #2563eb; }
+        .seg-mould { background: #7c3aed; }
+        .seg-running { background: #0891b2; }
+        .seg-overheads { background: #f59e0b; }
+
+        .cost-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* Table styling */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            margin-bottom: 16px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background: var(--surface-subtle);
+            font-weight: 600;
+            color: var(--ink-secondary);
+            white-space: nowrap;
+        }
+
+        .data-table tbody tr:hover {
+            background: rgba(248, 250, 252, 0.85);
+        }
+
+        .data-table tr.row-active {
+            background: var(--brand-soft) !important;
+            font-weight: 600;
+        }
+
+        .num-align {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tier-active-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 11px;
+            border-radius: 999px;
+            background: var(--brand);
+            color: #fff;
+            margin-left: 6px;
+        }
+
+        /* Right Sticky Outputs panel */
+        .sticky-sidebar {
+            position: sticky;
+            top: 88px;
+        }
+
+        .hero-pricing {
+            background: linear-gradient(135deg, #1e3a8a, #0284c7);
+            color: #ffffff;
+            padding: 24px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+        }
+
+        .hero-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+        }
+
+        .hero-amount {
+            font-size: 34px;
+            font-weight: 800;
+            margin: 6px 0;
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hero-sub {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            font-size: 13.5px;
+        }
+
+        /* Margin selection pills */
+        .margin-pills {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .margin-pill {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--surface);
+            color: var(--muted);
+            transition: all 0.15s;
+        }
+
+        .margin-pill.active {
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+        }
+
+        /* Buttons */
+        .btn {
+            font: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.1s;
+        }
+
+        .btn-primary {
+            background: var(--brand);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--ink-secondary);
+            border-color: var(--border-strong);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-subtle);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Theme toggle button styling */
+        .theme-toggle-btn {
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            color: var(--ink);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Printable Quotation Paper stylesheet */
+        .quote-paper {
+            background: #ffffff;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            color: #0f172a;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--ink);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .q-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--brand);
+            margin: 0;
+        }
+
+        .q-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 640px) {
+            .q-meta-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .q-meta-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-size: 13.5px;
+        }
+
+        .q-sign-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 48px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .q-sign-line {
+            border-bottom: 1px dashed var(--border-strong);
+            height: 44px;
+            margin-bottom: 8px;
+        }
+
+        /* Action Buttons */
+        .btn-action { width: 100%; padding: 11px; border: none; border-radius: var(--radius-md); font-weight: 600; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+        .btn-copy { background: var(--pill-active-bg); color: var(--pill-active-text); }
+        .btn-copy:hover { opacity: 0.9; }
+        .btn-pdf { background: var(--btn-pdf-bg); color: var(--btn-pdf-text); border: 1px solid var(--border-light); }
+        .btn-pdf:hover { background: var(--btn-pdf-hover); }
+
+        details.cost-accordion { background: var(--accordion-bg); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 16px; font-size: 0.82rem; }
+        details.cost-accordion summary { font-weight: 500; color: var(--text-muted); cursor: pointer; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        details.cost-accordion summary::-webkit-details-marker { display: none; }
+        details.cost-accordion summary::after { content: "＋"; font-size: 0.9rem; }
+        details[open].cost-accordion summary::after { content: "－"; }
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+        .price-mini { background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+        .price-mini .lbl { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-bottom: 2px; }
+        .price-mini .val { font-size: 1.05rem; font-weight: 600; color: var(--text-dark); }
+        .price-mini .sub-unit { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .summary-list { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px; }
+        .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dashed var(--border-light); }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-muted); font-size: 0.82rem; font-weight: 400; }
+        .summary-item input[type="checkbox"] { cursor: pointer; width: 14px; height: 14px; }
+        
+        /* Spaced out disclaimer notes as requested */
+        .disclaimer {
+            font-size: 0.8rem;
+            color: var(--accent-amber);
+            background: rgba(217, 119, 6, 0.08);
+            border: 1px solid var(--accent-amber);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            line-height: 1.7; /* Increased line-height/spacing as requested */
+        }
+
+        .inline-feedback {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        /* Print view styles */
+        .print-header { display: none; }
+        .print-spec-table { display: none; }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+            }
+            .theme-toggle-btn, .main-form, .btn-action, .disclaimer, header, details.cost-accordion, .margin-pills, .price-grid {
+                display: none !important;
+            }
+            .layout {
+                display: block !important;
+            }
+            .result-side {
+                width: 100% !important;
+            }
+            .card.result-card {
+                border: none !important;
+                box-shadow: none !important;
+                position: static !important;
+                padding: 0 !important;
+            }
+            .print-header {
+                display: block !important;
+                margin-bottom: 24px;
+                border-bottom: 3px solid #0f172a;
+                padding-bottom: 12px;
+                color: #0f172a !important;
+            }
+            .print-header h2 {
+                font-size: 1.6rem;
+                font-weight: 800;
+                margin-bottom: 6px;
+            }
+            .print-header p {
+                font-size: 0.9rem;
+                color: #334155;
+                margin-bottom: 4px;
+            }
+            .print-spec-table {
+                display: block !important;
+                margin-bottom: 24px;
+                border: 2px solid #cbd5e1;
+                border-radius: 8px;
+                padding: 16px;
+                font-size: 0.95rem;
+                background: #f8fafc !important;
+                color: #0f172a !important;
+            }
+            .print-spec-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+                border-bottom: 1px dashed #cbd5e1;
+            }
+            .print-spec-row:last-child {
+                border-bottom: none;
+            }
+            .price-hero {
+                background: #f1f5f9 !important;
+                border: 2px solid #0f172a !important;
+                color: #0f172a !important;
+                padding: 24px !important;
+                margin-top: 16px;
+                border-radius: 8px !important;
+                box-shadow: none !important;
+            }
+            .price-hero .title {
+                color: #475569 !important;
+                font-size: 0.9rem !important;
+                font-weight: 700 !important;
+            }
+            .price-hero .amount {
+                color: #0f172a !important;
+                font-size: 2.8rem !important;
+                font-weight: 800 !important;
+            }
+            .price-hero .sub {
+                color: #1e293b !important;
+                font-size: 1.1rem !important;
+                font-weight: 700 !important;
+            }
+            .summary-list {
+                margin-top: 16px;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                padding: 12px;
+            }
+            .summary-item {
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .summary-item label input {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Top App Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="brand-group">
+                <div class="brand-logo">P</div>
+                <div class="brand-text">
+                    <h1>PrintQuote &amp; Formula Studio</h1>
+                    <p>ระบบประมาณราคาเสนอขายและคำนวณต้นทุนการผลิตด่วนหน้างาน (Siam Printing &amp; Packaging)</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">
+                    🌙 Dark Mode
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Print System Selector Toggle (เหมือนแบบที่ 1) -->
+    <div class="system-toggle-wrap no-print">
+        <div class="system-toggle">
+            <button type="button" class="system-btn system-btn-offset active" id="btnSystemOffset">
+                🖥️ ระบบพิมพ์ Offset (แผ่น / กล่อง)
+            </button>
+            <button type="button" class="system-btn system-btn-gravure" id="btnSystemGravure">
+                🌀 ระบบพิมพ์ Gravure (ม้วน / ซอง)
+            </button>
+        </div>
+    </div>
+
+    <!-- TAB 1: ESTIMATOR -->
+    <div id="view-estimator" class="view-section active">
+        <!-- Hidden/Native elements to satisfy working JS logic variables unmodified -->
+        <div style="display:none;">
+            <input type="radio" id="sysOffset" name="printSystem" value="offset" checked onchange="updateSystemUI()">
+            <input type="radio" id="sysGravure" name="printSystem" value="gravure" onchange="updateSystemUI()">
+        </div>
+
+        <div class="estimator-grid">
+            <!-- Left inputs column -->
+            <div class="inputs-column">
+                
+                <!-- 1. ข้อมูลทั่วไปลูกค้า -->
+                <div class="card">
+                    <div class="card-header-line">
+                        <h2 class="card-heading">
+                            <span class="heading-pill">1</span>
+                            ข้อมูลลูกค้า &amp; บริษัทผู้ติดต่อ (Customer Details)
+                        </h2>
+                    </div>
+                    <!-- custom-customer-row keeps them on the same level and makes 'ชื่อผู้ติดต่อ' exactly 25% wider than the first box -->
+                    <div class="form-row custom-customer-row">
+                        <div class="field-group">
+                            <label class="field-label" for="clientName">ชื่อบริษัทลูกค้า / โครงการ</label>
+                            <input type="text" id="clientName" value="โครงการจัดทำกล่องแพ็คเกจเครื่องสำอางสมุนไพร" placeholder="ระบุชื่อลูกค้าหรือโปรเจกต์..." oninput="calculate()">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="contactPerson">ชื่อผู้ติดต่อประสานงาน (กว้างขึ้น 25%)</label>
+                            <input type="text" id="contactPerson" value="คุณธนพร วิศาลเกียรติ" placeholder="ระบุชื่อผู้ติดต่อ..." oninput="calculate()">
+                        </div>
+                        <div class="form-group" style="display:none;">
+                            <label for="contactPhone">เบอร์โทรศัพท์ติดต่อ</label>
+                            <input type="text" id="contactPhone" value="081-452-xxxx" placeholder="ระบุเบอร์โทร..." oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. ปริมาณและสเปกชิ้นงาน -->
+                <div class="card">
+                    <div class="card-header-line">
+                        <h2 class="card-heading">
+                            <span class="heading-pill">2</span>
+                            ปริมาณที่ต้องการสั่งผลิต &amp; ขนาดชิ้นงาน (Volume &amp; Dimensions)
+                        </h2>
+                    </div>
+
+                    <div class="field-group" style="margin-bottom: 20px;">
+                        <label class="field-label" for="quantity">
+                            <span>จำนวนผลิตสำเร็จรูป (<span id="qtyUnitText">ชิ้น</span>)</span>
+                            <span class="field-desc">เลื่อนปุ่มสไลด์ดึงปริมาณ หรือพิมพ์ตัวเลขโดยตรงเพื่อดูการเปลี่ยนราคาในทันที</span>
+                        </label>
+                        <div class="slider-row">
+                            <input type="range" id="quantitySlider" class="range-input" min="100" max="25000" step="100" value="10000">
+                            <input type="number" id="quantity" class="text-input num-align" value="10000" min="1" oninput="onQuantityInput()">
+                        </div>
+                    </div>
+
+                    <div class="form-row cols-3">
+                        <div class="field-group">
+                            <label class="field-label" for="width">ขนาดกว้างสำเร็จ (ซม.)</label>
+                            <input type="number" id="width" value="10" step="0.1" oninput="calculate()">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="length">ขนาดความยาว/ดึงสำเร็จ (ซม.)</label>
+                            <input type="number" id="length" value="15" step="0.1" oninput="calculate()">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="colorCount">จำนวนสีที่ต้องพิมพ์ (เพลท)</label>
+                            <input type="number" id="colorCount" value="4" min="1" max="10" oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. วัตถุดิบและระบบสีประสาน -->
+                <div class="card">
+                    <div class="card-header-line">
+                        <h2 class="card-heading">
+                            <span class="heading-pill">3</span>
+                            กลุ่มเกรดวัสดุ / ชนิดกระดาษราคากลางอ้างอิง (Material Selector)
+                        </h2>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="materialSelect">กลุ่มวัสดุมาตรฐานของโรงงาน</label>
+                        <select id="materialSelect" class="select-input" onchange="calculate()"></select>
+                    </div>
+                </div>
+
+                <!-- 4. บริการเคลือบผิวและงานแปรรูปสำเร็จ -->
+                <div class="card">
+                    <div class="card-header-line">
+                        <h2 class="card-heading">
+                            <span class="heading-pill">4</span>
+                            บริการเคลือบผิวอุตสาหกรรม &amp; งานแปรรูปหลังพิมพ์ (Finishing)
+                        </h2>
+                    </div>
+                    <div class="checkbox-grid">
+                        <label class="check-card">
+                            <input type="checkbox" id="finishLaminate" checked onchange="calculate()">
+                            <span>เคลือบผิวเงา/ด้าน</span>
+                        </label>
+                        <label class="check-card">
+                            <input type="checkbox" id="finishDiecut" onchange="calculate()">
+                            <span>ปั๊มไดคัทขึ้นรูป</span>
+                        </label>
+                        <label class="check-card">
+                            <input type="checkbox" id="finishFold" onchange="calculate()">
+                            <span>พับ / ปะกาวกล่อง</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDEBAR PANEL -->
+            <aside class="sticky-sidebar">
+                <div class="card">
+                    
+                    <div class="hero-pricing" id="pricingHeroPanel">
+                        <div class="hero-label">ราคาเสนอขายเสนอประมาณการลูกค้า (ก่อน VAT) (+<span id="labelCustomMargin">20</span>% Margin)</div>
+                        <div class="hero-amount" id="resCustomTotalPrice">0 ฿</div>
+                        <div class="hero-sub">
+                            <span>เฉลี่ยชิ้นละสำเร็จประมาณ: <strong id="resCustomPerUnit" style="font-size:15px; font-weight:800;">0.00</strong> บาท</span>
+                            <span>ระบบเครื่องหลัก: <strong id="resSystemText" style="font-size:13.5px; font-weight:700;">Offset</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- 1. Cost proportion bar (สัดส่วนต้นทุน) -->
+                    <div class="cost-bar-wrap">
+                        <div class="field-label" style="margin-bottom: 6px;">
+                            <span>สัดส่วนโครงสร้างต้นทุนผลิตโรงงาน</span>
+                            <span id="resRawTotalCostSummary" style="font-weight:700; color:var(--ink); font-variant-numeric: tabular-nums;">0 ฿</span>
+                        </div>
+                        <div class="cost-bar">
+                            <div id="barMat" class="seg-material" style="width: 35%"></div>
+                            <div id="barInk" class="seg-mould" style="width: 15%"></div>
+                            <div id="barLabor" class="seg-running" style="width: 25%"></div>
+                            <div id="barOther" class="seg-overheads" style="width: 25%"></div>
+                        </div>
+                        <div class="cost-legend">
+                            <span class="legend-item"><span class="legend-dot seg-material"></span>วัตถุดิบ</span>
+                            <span class="legend-item"><span class="legend-dot seg-mould"></span>หมึกพิมพ์</span>
+                            <span class="legend-item"><span class="legend-dot seg-running"></span>ค่าแรงช่าง</span>
+                            <span class="legend-item"><span class="legend-dot seg-overheads"></span>แฝงโรงพิมพ์</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Accordion ต้นทุนย่อย (ทีมขายสามารถปิดเพื่อเจรจาได้) -->
+                    <details class="cost-accordion" open>
+                        <summary>
+                            <span>รายการโครงสร้างต้นทุนและสัดส่วนจริง</span>
+                        </summary>
+                        <div class="summary-list" style="margin-top:10px; margin-bottom:0;">
+                            <div class="summary-item">
+                                <label><input type="checkbox" id="incMat" checked onchange="calculate()"> ค่าวัสดุ/กระดาษ</label>
+                                <strong id="resCostMat" style="font-variant-numeric: tabular-nums;">0 บาท</strong>
+                            </div>
+                            <div class="summary-item">
+                                <label><input type="checkbox" id="incInk" checked onchange="calculate()"> หมึกพิมพ์และIPA</label>
+                                <strong id="resCostInk" style="font-variant-numeric: tabular-nums;">0 บาท</strong>
+                            </div>
+                            <div class="summary-item">
+                                <label><input type="checkbox" id="incLabor" checked onchange="calculate()"> ค่าแรงช่างและผู้คุม</label>
+                                <strong id="resCostLabor" style="font-variant-numeric: tabular-nums;">0 บาท</strong>
+                            </div>
+                            <div class="summary-item">
+                                <label><input type="checkbox" id="incUtility" checked onchange="calculate()"> ค่าน้ำ/ไฟพลังงานรันเครื่อง</label>
+                                <strong id="resCostUtility" style="font-variant-numeric: tabular-nums;">0 บาท</strong>
+                            </div>
+                            <div class="summary-item">
+                                <label><input type="checkbox" id="incMold" checked onchange="calculate()"> ค่าทำเพลท/บล็อกสลักสี</label>
+                                <strong id="resMoldCost" style="font-variant-numeric: tabular-nums;">0 บาท</strong>
+                            </div>
+                            <div class="summary-item">
+                                <label><input type="checkbox" id="incFinish" checked onchange="calculate()"> งานแปรรูปและงานหลังพิมพ์</label>
+                                <strong id="resFinishCost" style="font-variant-numeric: tabular-nums;">0 บาท</strong>
+                            </div>
+                            <div class="summary-item" style="border-top:1px solid var(--border-light); margin-top:6px; padding-top:6px;">
+                                <span><strong>รวมมูลค่าต้นทุนผลิตจริงโรงงาน:</strong></span>
+                                <strong id="resRawTotalCost" style="color:var(--accent-amber); font-variant-numeric: tabular-nums;">0 ฿</strong>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- 3. เปอร์เซ็นต์กำไรประเมินราคา (Markup margin slider) -->
+                    <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:8px;">
+                        <span>เปอร์เซ็นต์อัตรากำไรขายเพิ่ม (Markup Margin %):</span>
+                    </div>
+                    <div class="margin-pills">
+                        <div class="margin-pill" onclick="setMargin(10)">+10%</div>
+                        <div class="margin-pill" onclick="setMargin(15)">+15%</div>
+                        <div class="margin-pill active" id="pill20" onclick="setMargin(20)">+20%</div>
+                        <div class="margin-custom-container">
+                            <!-- Custom margin slider paired together! -->
+                            <input type="number" id="customMargin" class="margin-custom-input" value="20" min="0" max="100" oninput="onCustomMarginInput()"> %
+                        </div>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <input type="range" id="marginSlider" class="range-input" min="0" max="100" step="5" value="20" oninput="onMarginSliderMove()">
+                    </div>
+
+                    <!-- เปรียบเทียบช่วงการเจรจาต่อรองด่วน -->
+                    <div class="price-grid">
+                        <div class="price-mini">
+                            <div class="lbl">ช่วงต่อรอง 10%</div>
+                            <div class="val" id="resTotalPrice10">0 ฿</div>
+                            <div class="sub-unit">ชิ้นละ <span id="resPerUnit10">0.00</span> ฿</div>
+                        </div>
+                        <div class="price-mini">
+                            <div class="lbl">ช่วงปลอดภัย 20%</div>
+                            <div class="val" id="resTotalPrice20">0 ฿</div>
+                            <div class="sub-unit">ชิ้นละ <span id="resPerUnit20">0.00</span> ฿</div>
+                        </div>
+                    </div>
+
+                    <!-- 4. ตารางวิเคราะห์เปรียบเทียบขั้นบันไดจำนวน (Quantity Tiers Comparison) -->
+                    <h3 style="font-size:14px; margin: 0 0 10px; font-weight:700;">วิเคราะห์ตารางเทียบขั้นบันไดจำนวน (Quantity Tiers)</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>จำนวนชิ้นผลิต</th>
+                                    <th class="num-align">ราคาเสนอขาย</th>
+                                    <th class="num-align">เฉลี่ยต่อหน่วย</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tiersTableBody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="font-size:12.5px; margin-bottom:12px;">
+                        ประมาณการระยะเวลารันแท่นพิมพ์ผลิต: <strong id="resEstTime" style="font-variant-numeric: tabular-nums;">-</strong>
+                    </div>
+
+                    <!-- Spaced out disclaimer notes as requested -->
+                    <div class="disclaimer">
+                        ⚠️ <strong>หมายเหตุทีมขาย:</strong> ราคานี้เสนอเป็นราคาประเมินเบื้องต้นหน้างาน (ไม่รวมภาษีมูลค่าเพิ่ม VAT 7% และไม่รวมค่าจัดส่งสินค้าบรรจุภัณฑ์ภายนอก)
+                    </div>
+
+                    <!-- ปุ่มควบคุมหลัก -->
+                    <button class="btn-action btn-copy" onclick="copySummaryToClipboard()">
+                        📋 คัดลอกสรุปรายละเอียด (ส่งแชท LINE)
+                    </button>
+                    <button class="btn-action btn-pdf" id="btnExportPDF" onclick="exportToPDF()">
+                        🖨️ สั่งพิมพ์ใบประเมินราคา / บันทึก PDF
+                    </button>
+                    <div id="copyFeedback" class="inline-feedback" style="display:none;"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ฐานข้อมูลราคากลางและอัตราการผลิตสำหรับทีมขาย (Sales Estimator Database)
+    const SALES_CONFIG = {
+        marginPercentage: 0.20,
+        materials: {
+            offset: [
+                { id: "bond", name: "ราคากลางกระดาษปอนด์ ขนาด 31x43 นิ้ว", price: 2.22, unit: "แผ่น", widthCm: 78.74, lengthCm: 109.22 },
+                { id: "art1", name: "ราคากลางกระดาษอาร์ตมัน / อาร์ตด้าน 130 แกรม ขนาด 31x43 นิ้ว", price: 6.46, unit: "แผ่น", widthCm: 78.74, lengthCm: 109.22 },
+                { id: "art2", name: "ราคากลางกระดาษอาร์ตการ์ด 2 หน้า 260-300 แกรม ขนาด 31x43 นิ้ว", price: 7.00, unit: "แผ่น", widthCm: 78.74, lengthCm: 109.22 },
+                { id: "sticker_sm", name: "ราคากลางกระดาษสติ๊กเกอร์ ขนาด 330 x 450 มม.", price: 3.50, unit: "แผ่น", widthCm: 33.0, lengthCm: 45.0 },
+                { id: "white_craft", name: "กระดาษขาวมันหลังคราฟท์เหลือง ขนาด 106 x 70 มม.", price: 13.36, unit: "แผ่น", widthCm: 10.6, lengthCm: 7.0 },
+                { id: "special", name: "ราคากลางกระดาษพิเศษ / Greaseproof / คราฟท์น้ำตาล", price: 3.00, unit: "แผ่น", widthCm: 78.74, lengthCm: 109.22 },
+                { id: "sticker_pp", name: "กระดาษสติ๊กเกอร์ PP Gloss PPWG 330x483 mm.", price: 6.99, unit: "แผ่น", widthCm: 33.0, lengthCm: 48.3 }
+            ],
+            gravure: [
+                { id: "tipping", name: "ราคากลางกลุ่มกระดาษม้วน (Tipping)", price: 9215.00, unit: "ม้วน", rollWidthCm: 57, rollMeters: 8500 },
+                { id: "art_roll", name: "ราคากลางกลุ่มกระดาษม้วน (อาร์ต)", price: 21000.00, unit: "ม้วน", rollWidthCm: 108, rollMeters: 8300 },
+                { id: "bond70_roll", name: "ราคากลางกลุ่มกระดาษม้วน (ปอนด์70)", price: 24151.00, unit: "ม้วน", rollWidthCm: 109.2, rollMeters: 8000 },
+                { id: "bond80_roll", name: "ราคากลางกลุ่มกระดาษม้วน (ปอนด์80)", price: 17710.00, unit: "ม้วน", rollWidthCm: 109.2, rollMeters: 8000 },
+                { id: "craft_roll", name: "ราคากลางกลุ่มกระดาษม้วน (คราฟท์)", price: 20777.00, unit: "ม้วน", rollWidthCm: 92.7, rollMeters: 8000 },
+                { id: "pet_roll", name: "ราคากลางกลุ่มฟิล์ม (PET)", price: 7000.00, unit: "ม้วน", rollWidthCm: 72, rollMeters: 12000 }
+            ]
+        },
+        productionRates: {
+            offset: {
+                plateCostPerColor: 89,          // บาท/สี
+                speedUnitsPerHour: 5000,        // 5000 แผ่น/ชั่วโมง
+                electricityCostPerDay: 1000,    // บาท/วัน (8 ชม. = 125 บาท/ชม.)
+                laborRatePerHour: 508           // บาท/ชั่วโมง
+            },
+            gravure: {
+                cylinderCostPerColor: 2800,     // แก้ไขจาก 0 เป็น 2,800 เพื่อป้องกันข้อผิดพลาดการคำนวณราคา Gravure
+                speedMetersPerHour: 12000,      // 12000 เมตร/ชั่วโมง
+                electricityCostPerDay: 1000,    // บาท/วัน (8 ชม. = 125 บาท/ชม.)
+                laborRatePerHour: 508           // บาท/ชั่วโมง
+            }
+        },
+        inkRates: {
+            offset: {
+                baseInkPrice: 400.00,          // บาท/กก.
+                coveragePerKg: 1250,           // หมึก 1 กก. วิ่งได้ 1,250 แผ่น
+                solventCostPerKg: 2.65         // IPA 53 บ./กก. ใช้ 0.5 กก. ต่อหมึก 10 กก.
+            },
+            gravurePaper: {
+                baseInkPrice: 260.00,          // บาท/กก.
+                coveragePerKgMeters: 175,      // หมึก 1 กก. วิ่งได้ 175 เมตร
+                solventCostPerKg: 24.34        // Ethyl Acetate 35.4 บ./กก. ใช้ 11 กก. ต่อหมึก 16 กก.
+            },
+            gravurePET: {
+                baseInkPrice: 180.00,
+                coveragePerKgMeters: 7.5,      // หมึก 1 กก. วิ่งได้ 7.5 เมตร
+                solventCostPerKg: 24.34
+            }
+        },
+        finishingRates: {
+            lamination: {
+                ratePerSqM: 3.50               // บาท/ตารางเมตร (เช่น เคลือบเงา/ด้าน)
+            },
+            dieCut: {
+                baseBlockCost: 950,            // ค่าบล็อกไดคัทเหมาจ่าย (บาท)
+                ratePerThousand: 250           // ค่าแรงไดคัทต่อ 1,000 ชิ้น (บาท)
+            },
+            foldingGluing: {
+                ratePerThousand: 180           // ค่าพับ/ปะกาวต่อ 1,000 ชิ้น (บาท)
+            }
+        }
+    };
+
+    // System Variables
+    let currentSystem = 'offset'; // 'offset' or 'gravure'
+
+    function toggleTheme() {
+        const body = document.documentElement;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        document.getElementById('themeBtn').innerHTML = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+
+    function loadSavedTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeBtn').innerHTML = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+    }
+
+    function updateSystemUI() {
+        const isOffset = document.getElementById('sysOffset').checked;
+        const matSelect = document.getElementById('materialSelect');
+        const qtyUnitText = document.getElementById('qtyUnitText');
+        
+        // Sync toggles visually
+        document.getElementById('btnSystemOffset').classList.toggle('active', isOffset);
+        document.getElementById('btnSystemGravure').classList.toggle('active', !isOffset);
+        
+        matSelect.innerHTML = '';
+        const matList = isOffset ? SALES_CONFIG.materials.offset : SALES_CONFIG.materials.gravure;
+        matList.forEach((mat) => {
+            const opt = document.createElement('option');
+            opt.value = mat.id;
+            opt.textContent = `${mat.name} (${mat.price.toLocaleString()} บ./${mat.unit})`;
+            matSelect.appendChild(opt);
+        });
+        qtyUnitText.textContent = isOffset ? 'ชิ้น' : 'ชิ้น / เมตร';
+        calculate();
+    }
+
+    // Toggle Printing systems via top beautiful buttons
+    document.getElementById('btnSystemOffset').addEventListener('click', () => {
+        document.getElementById('sysOffset').checked = true;
+        updateSystemUI();
+    });
+    document.getElementById('btnSystemGravure').addEventListener('click', () => {
+        document.getElementById('sysGravure').checked = true;
+        updateSystemUI();
+    });
+
+    function setMargin(val) {
+        document.getElementById('customMargin').value = val;
+        document.getElementById('marginSlider').value = val;
+        
+        document.querySelectorAll('.margin-pill').forEach(pill => pill.classList.remove('active'));
+        if (val === 10) document.querySelectorAll('.margin-pill')[0].classList.add('active');
+        if (val === 15) document.querySelectorAll('.margin-pill')[1].classList.add('active');
+        if (val === 20) document.getElementById('pill20').classList.add('active');
+        calculate();
+    }
+
+    function onCustomMarginInput() {
+        document.querySelectorAll('.margin-pill').forEach(pill => pill.classList.remove('active'));
+        document.getElementById('marginSlider').value = document.getElementById('customMargin').value;
+        calculate();
+    }
+
+    function onMarginSliderMove() {
+        const val = document.getElementById('marginSlider').value;
+        document.getElementById('customMargin').value = val;
+        document.querySelectorAll('.margin-pill').forEach(pill => pill.classList.remove('active'));
+        if (val == 10) document.querySelectorAll('.margin-pill')[0].classList.add('active');
+        if (val == 15) document.querySelectorAll('.margin-pill')[1].classList.add('active');
+        if (val == 20) document.getElementById('pill20').classList.add('active');
+        calculate();
+    }
+
+    function onQuantityInput() {
+        const val = document.getElementById('quantity').value;
+        document.getElementById('quantitySlider').value = Math.min(25000, Math.max(100, val));
+        calculate();
+    }
+
+    document.getElementById('quantitySlider').addEventListener('input', () => {
+        document.getElementById('quantity').value = document.getElementById('quantitySlider').value;
+        calculate();
+    });
+
+    // Core Calculation Logic (Preserved entirely)
+    function calculateCostForVolume(qtyOverride) {
+        const isOffset = document.getElementById('sysOffset').checked;
+        const systemKey = isOffset ? 'offset' : 'gravure';
+        const matId = document.getElementById('materialSelect').value;
+        const qty = qtyOverride !== undefined ? qtyOverride : (parseFloat(document.getElementById('quantity').value) || 0);
+        const w = parseFloat(document.getElementById('width').value) || 1;
+        const l = parseFloat(document.getElementById('length').value) || 1;
+        const colors = parseFloat(document.getElementById('colorCount').value) || 1;
+        const marginPercent = parseFloat(document.getElementById('customMargin').value) || 0;
+        const matList = SALES_CONFIG.materials[systemKey];
+        const selectedMat = matList.find(m => m.id === matId) || matList[0];
+        const prodRates = SALES_CONFIG.productionRates[systemKey];
+        
+        const moldCost = colors * (isOffset ? prodRates.plateCostPerColor : prodRates.cylinderCostPerColor);
+        let estHours = 0;
+        let totalMetersUsed = 0;
+        if (isOffset) {
+            const fitW = Math.floor(selectedMat.widthCm / w) || 1;
+            const fitL = Math.floor(selectedMat.lengthCm / l) || 1;
+            const fitPerSheet = fitW * fitL;
+            const totalSheets = Math.ceil(qty / fitPerSheet);
+            
+            totalMetersUsed = (selectedMat.lengthCm * totalSheets) / 100;
+            estHours = totalSheets / prodRates.speedUnitsPerHour;
+        } else {
+            totalMetersUsed = (l / 100) * qty;
+            estHours = totalMetersUsed / prodRates.speedMetersPerHour;
+        }
+        if (estHours < 0.5) estHours = 0.5;
+        const laborOnlyCost = estHours * prodRates.laborRatePerHour;
+        const utilityCost = estHours * (prodRates.electricityCostPerDay / 8);
+        let matCost = 0;
+        if (isOffset) {
+            const fitW = Math.floor(selectedMat.widthCm / w) || 1;
+            const fitL = Math.floor(selectedMat.lengthCm / l) || 1;
+            const fitPerSheet = fitW * fitL;
+            const sheetsNeeded = Math.ceil(qty / fitPerSheet);
+            matCost = sheetsNeeded * selectedMat.price;
+        } else {
+            const rollsNeeded = totalMetersUsed / selectedMat.rollMeters;
+            matCost = rollsNeeded * selectedMat.price;
+        }
+        let inkCost = 0;
+        if (isOffset) {
+            const ink = SALES_CONFIG.inkRates.offset;
+            const inkPriceTotal = ink.baseInkPrice + ink.solventCostPerKg;
+            const inkKgNeeded = (qty / ink.coveragePerKg) * (colors / 4);
+            inkCost = inkKgNeeded * inkPriceTotal;
+        } else {
+            const isPET = selectedMat.id === 'pet_roll';
+            const ink = isPET ? SALES_CONFIG.inkRates.gravurePET : SALES_CONFIG.inkRates.gravurePaper;
+            const inkPriceTotal = ink.baseInkPrice + ink.solventCostPerKg;
+            const inkKgNeeded = (totalMetersUsed / ink.coveragePerKgMeters) * (colors / 4);
+            inkCost = inkKgNeeded * inkPriceTotal;
+        }
+        let finishCost = 0;
+        const finishRates = SALES_CONFIG.finishingRates || {};
+        if (document.getElementById('finishLaminate').checked && finishRates.lamination) {
+            const areaSqM = (w * l / 10000) * qty;
+            finishCost += areaSqM * (finishRates.lamination.ratePerSqM || 0);
+        }
+        if (document.getElementById('finishDiecut').checked && finishRates.dieCut) {
+            const dieCutBlock = finishRates.dieCut.baseBlockCost || 0;
+            const dieCutLabor = (qty / 1000) * (finishRates.dieCut.ratePerThousand || 0);
+            finishCost += dieCutBlock + dieCutLabor;
+        }
+        if (document.getElementById('finishFold').checked && finishRates.foldingGluing) {
+            const foldLabor = (qty / 1000) * (finishRates.foldingGluing.ratePerThousand || 0);
+            finishCost += foldLabor;
+        }
+        const useMat = document.getElementById('incMat').checked;
+        const useInk = document.getElementById('incInk').checked;
+        const useLabor = document.getElementById('incLabor').checked;
+        const useUtility = document.getElementById('incUtility').checked;
+        const useMold = document.getElementById('incMold').checked;
+        const useFinish = document.getElementById('incFinish').checked;
+        const activeMatCost = useMat ? matCost : 0;
+        const activeInkCost = useInk ? inkCost : 0;
+        const activeLaborCost = useLabor ? laborOnlyCost : 0;
+        const activeUtilityCost = useUtility ? utilityCost : 0;
+        const activeMoldCost = useMold ? moldCost : 0;
+        const activeFinishCost = useFinish ? finishCost : 0;
+        const rawTotalCost = activeMatCost + activeInkCost + activeLaborCost + activeUtilityCost + activeMoldCost + activeFinishCost;
+        
+        const customTotalPrice = rawTotalCost * (1 + (marginPercent / 100));
+        const customPerUnit = qty > 0 ? (customTotalPrice / qty) : 0;
+        const price10 = rawTotalCost * 1.10;
+        const perUnit10 = qty > 0 ? (price10 / qty) : 0;
+        const price20 = rawTotalCost * 1.20;
+        const perUnit20 = qty > 0 ? (price20 / qty) : 0;
+
+        return {
+            qty,
+            matCost,
+            inkCost,
+            laborOnlyCost,
+            utilityCost,
+            moldCost,
+            finishCost,
+            rawTotalCost,
+            customTotalPrice,
+            customPerUnit,
+            price10,
+            perUnit10,
+            price20,
+            perUnit20,
+            estHours,
+            totalMetersUsed,
+            materialName: selectedMat.name
+        };
+      }
+
+      function calculate() {
+        const isOffset = document.getElementById('sysOffset').checked;
+        const calc = calculateCostForVolume();
+
+        // Update cost proportion visual bars (สัดส่วนต้นทุน)
+        const totalBaseCost = Math.max(1, calc.rawTotalCost);
+        document.getElementById('barMat').style.width = `${(calc.matCost / totalBaseCost) * 100}%`;
+        document.getElementById('barInk').style.width = `${(calc.inkCost / totalBaseCost) * 100}%`;
+        document.getElementById('barLabor').style.width = `${(calc.laborOnlyCost / totalBaseCost) * 100}%`;
+        document.getElementById('barOther').style.width = `${((calc.utilityCost + calc.moldCost + calc.finishCost) / totalBaseCost) * 100}%`;
+
+        // Update Sidebar/Outputs
+        document.getElementById('resCostMat').textContent = `${Math.ceil(calc.matCost).toLocaleString()} บาท (${calc.totalMetersUsed.toLocaleString(undefined, {maximumFractionDigits: 1})} ม.)`;
+        document.getElementById('resCostInk').textContent = `${Math.ceil(calc.inkCost).toLocaleString()} บาท`;
+        document.getElementById('resCostLabor').textContent = `${Math.ceil(calc.laborOnlyCost).toLocaleString()} บาท`;
+        document.getElementById('resCostUtility').textContent = `${Math.ceil(calc.utilityCost).toLocaleString()} บาท`;
+        document.getElementById('resMoldCost').textContent = `${calc.moldCost.toLocaleString()} บาท`;
+        document.getElementById('resFinishCost').textContent = `${Math.ceil(calc.finishCost).toLocaleString()} บาท`;
+        document.getElementById('resRawTotalCost').textContent = `${Math.ceil(calc.rawTotalCost).toLocaleString()} ฿`;
+        document.getElementById('resRawTotalCostSummary').textContent = `${Math.ceil(calc.rawTotalCost).toLocaleString()} ฿`;
+        
+        const labelCustomMargin = document.getElementById('labelCustomMargin');
+        if (labelCustomMargin) {
+            labelCustomMargin.textContent = document.getElementById('customMargin').value;
+        }
+        document.getElementById('resCustomTotalPrice').textContent = `${Math.ceil(calc.customTotalPrice).toLocaleString()} ฿`;
+        document.getElementById('resCustomPerUnit').textContent = calc.customPerUnit.toFixed(2);
+        
+        document.getElementById('resTotalPrice10').textContent = `${Math.ceil(calc.price10).toLocaleString()} ฿`;
+        document.getElementById('resPerUnit10').textContent = calc.perUnit10.toFixed(2);
+        document.getElementById('resTotalPrice20').textContent = `${Math.ceil(calc.price20).toLocaleString()} ฿`;
+        document.getElementById('resPerUnit20').textContent = calc.perUnit20.toFixed(2);
+        
+        document.getElementById('resEstTime').textContent = `${calc.estHours.toFixed(1)} ชม.`;
+        document.getElementById('resSystemText').textContent = isOffset ? 'Offset' : 'Gravure';
+
+        // Calculate and Render Quantity Tiers Comparison Table
+        const tiers = [1000, 2000, 5000, 10000, 20000];
+        if (!tiers.includes(calc.qty)) {
+            tiers.push(calc.qty);
+        }
+        tiers.sort((a, b) => a - b);
+
+        const tbody = document.getElementById('tiersTableBody');
+        tbody.innerHTML = '';
+        tiers.forEach(tQty => {
+            const tCalc = calculateCostForVolume(tQty);
+            const isCurrent = (tQty === calc.qty);
+            const tr = document.createElement('tr');
+            if (isCurrent) tr.className = 'row-active';
+            tr.style.cursor = 'pointer';
+            tr.title = `คลิกเพื่อเลือกปรับปริมาณผลิตเป็น ${tQty.toLocaleString()} ชิ้น`;
+            tr.innerHTML = `
+                <td>
+                    <strong>${tQty.toLocaleString()} ชิ้น</strong>
+                    ${isCurrent ? ' <span class="tier-active-badge">กำลังเลือก</span>' : ''}
+                </td>
+                <td class="num-align">${Math.ceil(tCalc.customTotalPrice).toLocaleString()} ฿</td>
+                <td class="num-align"><strong>${tCalc.customPerUnit.toFixed(2)} ฿</strong></td>
+            `;
+            tr.addEventListener('click', () => {
+                document.getElementById('quantity').value = tQty;
+                document.getElementById('quantitySlider').value = Math.min(25000, tQty);
+                calculate();
+            });
+            tbody.appendChild(tr);
+        });
+
+        // Update Quotation Sheet live values (Fully formatted print document)
+        const clientNameVal = document.getElementById('clientName').value || 'ลูกค้าทั่วไป';
+        const contactPersonVal = document.getElementById('contactPerson').value || '-';
+        const contactPhoneVal = document.getElementById('contactPhone').value || '-';
+        const w = parseFloat(document.getElementById('width').value) || 1;
+        const l = parseFloat(document.getElementById('length').value) || 1;
+        const colors = parseFloat(document.getElementById('colorCount').value) || 1;
+
+        document.getElementById('printClient').textContent = clientNameVal;
+        document.getElementById('printContact').textContent = contactPersonVal;
+        document.getElementById('printPhone').textContent = contactPhoneVal;
+        
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('printDate').textContent = dateStr;
+        
+        document.getElementById('printSystemText').textContent = isOffset ? 'Offset (พิมพ์กระดาษแผ่นใหญ่)' : 'Gravure (พิมพ์บรรจุภัณฑ์ม้วนฟิล์ม)';
+        document.getElementById('printMaterialText').textContent = calc.materialName;
+        document.getElementById('printMaterialText_main').textContent = calc.materialName;
+        document.getElementById('printSizeText').textContent = `${w} x ${l} ซม.`;
+        document.getElementById('printQtyText').textContent = `${parseInt(calc.qty).toLocaleString()} ชิ้น`;
+        document.getElementById('printColorText').textContent = `${colors} สี`;
+
+        document.getElementById('resCustomPerUnit_main').textContent = calc.customPerUnit.toFixed(2);
+        document.getElementById('resCustomTotalPrice_main').textContent = Math.ceil(calc.customTotalPrice).toLocaleString();
+        document.getElementById('resCustomTotalPrice_foot').textContent = Math.ceil(calc.customTotalPrice).toLocaleString();
+        
+        const vatAmount = calc.customTotalPrice * 0.07;
+        document.getElementById('resVatAmount_foot').textContent = Math.ceil(vatAmount).toLocaleString();
+        document.getElementById('resGrandTotal_foot').textContent = Math.ceil(calc.customTotalPrice + vatAmount).toLocaleString();
+
+        window.pdfTotalFormatted = `${Math.ceil(calc.customTotalPrice).toLocaleString()} ฿`;
+        window.pdfPerUnitFormatted = calc.customPerUnit.toFixed(2);
+    }
+
+    function copySummaryToClipboard() {
+        const client = document.getElementById('clientName').value || 'ลูกค้าทั่วไป';
+        const contact = document.getElementById('contactPerson').value;
+        const phone = document.getElementById('contactPhone').value;
+        const isOffset = document.getElementById('sysOffset').checked;
+        const systemName = isOffset ? 'Offset' : 'Gravure';
+        const qty = document.getElementById('quantity').value;
+        const w = document.getElementById('width').value;
+        const l = document.getElementById('length').value;
+        const colors = document.getElementById('colorCount').value;
+        
+        const totalPrice = document.getElementById('resCustomTotalPrice').textContent;
+        const pricePerUnit = document.getElementById('resCustomPerUnit').textContent;
+        let contactStr = '';
+        if (contact || phone) {
+            contactStr = `📞 **ผู้ติดต่อ:** ${contact || '-'} ${phone ? `(${phone})` : ''}\n`;
+        }
+        const text = `📌 **สรุปราคาประเมินเบื้องต้น (${systemName})**
+
+👤 **ลูกค้า/งาน:** ${client}
+
+${contactStr}📏 **ขนาด:** ${w} x ${l} ซม. | **จำนวน:** ${parseInt(qty).toLocaleString()} ${isOffset ? 'ชิ้น' : 'ชิ้น / เมตร'} | **พิมพ์:** ${colors} สี
+
+---
+
+💰 **ยอดรวมประมาณการ:** ${totalPrice} (ราคาก่อน VAT)
+
+🏷️ **เฉลี่ยชิ้นละ:** ${pricePerUnit} บาท
+
+*(หมายเหตุ: ราคานี้เป็นราคาประเมินเบื้องต้นหน้างาน ยอดในใบเสนอราคาจริงอาจมีการปรับลดลงตามรายละเอียดเทคนิคการผลิต)*`;
+        navigator.clipboard.writeText(text).then(() => {
+            const fb = document.getElementById('copyFeedback');
+            fb.textContent = 'คัดลอกสรุปรายละเอียด (ส่งแชท LINE) เรียบร้อย!';
+            fb.style.display = 'block';
+            setTimeout(() => fb.style.display = 'none', 3000);
+        });
+    }
+
+    function exportToPDF() {
+        const titleElem = document.querySelector('.price-hero .title');
+        const amountElem = document.getElementById('resCustomTotalPrice');
+        const subElem = document.querySelector('.price-hero .sub');
+        const originalTitle = titleElem.innerHTML;
+        const originalAmount = amountElem.textContent;
+        const originalSub = subElem.innerHTML;
+        titleElem.textContent = "ราคาเสนอประมาณการสุทธิ";
+        amountElem.textContent = window.pdfTotalFormatted;
+        subElem.innerHTML = `เฉลี่ยชิ้นละ ${window.pdfPerUnitFormatted} บาท`;
+        window.print();
+        setTimeout(() => {
+            titleElem.innerHTML = originalTitle;
+            amountElem.textContent = originalAmount;
+            subElem.innerHTML = originalSub;
+        }, 500);
+    }
+
+    // Tab Navigation setup
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    window.onload = function() {
+        loadSavedTheme();
+        updateSystemUI();
+    };
+</script>
+</body>
+</html>
