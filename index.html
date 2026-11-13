@@ -1604,7 +1604,7 @@
         const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
         document.getElementById('printDate').textContent = dateStr;
         
-        document.getElementById('printSystemText').textContent = isOffset ? 'Offset (พิมพ์กระดาษแผ่นใหญ่)' : 'Gravure (พิมพ์บรรจุภัณฑ์ม้วนฟิล์ม)';
+        document.getElementById('printSystemText').textContent = isOffset ? 'Offset (พิมพ์กระดาษแผ่นใหญ่)' : 'Gravure (พิมพ์บรรจุภัณฑ์ม้วน)';
         document.getElementById('printMaterialText').textContent = calc.materialName;
         document.getElementById('printMaterialText_main').textContent = calc.materialName;
         document.getElementById('printSizeText').textContent = `${w} x ${l} ซม.`;
