@@ -143,34 +143,6 @@
             flex-wrap: wrap;
         }
 
-        .nav-tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--surface-subtle);
-            padding: 4px;
-            border-radius: 9px;
-            border: 1px solid var(--border);
-        }
-
-        .tab-btn {
-            font: inherit;
-            font-size: 13.5px;
-            font-weight: 600;
-            padding: 7px 14px;
-            border-radius: 6px;
-            border: none;
-            background: transparent;
-            color: var(--ink-secondary);
-            cursor: pointer;
-            transition: background-color 0.15s, color 0.15s;
-        }
-
-        .tab-btn.active {
-            background: var(--brand);
-            color: var(--brand-ink);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
         /* Print System Selector Toggle */
         .system-toggle-wrap {
             display: flex;
@@ -300,6 +272,10 @@
             /* Custom row where 2nd box (ชื่อผู้ติดต่อ) is 25% wider and aligned perfectly */
             .form-row.custom-customer-row {
                 grid-template-columns: 4fr 5fr; /* 5fr is 1.25 times larger than 4fr (25% wider) */
+            }
+            /* Custom material row where price input is aligned nicely on the same line */
+            .form-row.custom-material-row {
+                grid-template-columns: 2fr 1fr;
             }
         }
 
@@ -914,7 +890,7 @@
                             <input type="text" id="clientName" value="โครงการจัดทำกล่องแพ็คเกจเครื่องสำอางสมุนไพร" placeholder="ระบุชื่อลูกค้าหรือโปรเจกต์..." oninput="calculate()">
                         </div>
                         <div class="field-group">
-                            <label class="field-label" for="contactPerson">ชื่อผู้ติดต่อประสานงาน </label>
+                            <label class="field-label" for="contactPerson">ชื่อผู้ติดต่อประสานงาน (กว้างขึ้น 25%)</label>
                             <input type="text" id="contactPerson" value="คุณธนพร วิศาลเกียรติ" placeholder="ระบุชื่อผู้ติดต่อ..." oninput="calculate()">
                         </div>
                         <div class="form-group" style="display:none;">
@@ -968,9 +944,15 @@
                             กลุ่มเกรดวัสดุ / ชนิดกระดาษราคากลางอ้างอิง (Material Selector)
                         </h2>
                     </div>
-                    <div class="field-group">
-                        <label class="field-label" for="materialSelect">กลุ่มวัสดุมาตรฐานของโรงงาน</label>
-                        <select id="materialSelect" class="select-input" onchange="calculate()"></select>
+                    <div class="form-row custom-material-row">
+                        <div class="field-group">
+                            <label class="field-label" for="materialSelect">กลุ่มวัสดุมาตรฐานของโรงงาน</label>
+                            <select id="materialSelect" class="select-input" onchange="onMaterialChange()"></select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="materialPriceInput">ราคาเสนอปรับแก้ (<span id="matPriceUnitText">บาท</span>)</label>
+                            <input type="number" id="materialPriceInput" class="text-input num-align" step="0.01" oninput="calculate()">
+                        </div>
                     </div>
                 </div>
 
@@ -1352,10 +1334,29 @@
         matList.forEach((mat) => {
             const opt = document.createElement('option');
             opt.value = mat.id;
-            opt.textContent = `${mat.name} (${mat.price.toLocaleString()} บ./${mat.unit})`;
+            opt.textContent = mat.name; // Show only name, no price inside dropdown text!
             matSelect.appendChild(opt);
         });
         qtyUnitText.textContent = isOffset ? 'ชิ้น' : 'ชิ้น / เมตร';
+        
+        // Update price input box with default price of first material
+        onMaterialChange();
+    }
+
+    // Handle material selection change
+    function onMaterialChange() {
+        const isOffset = document.getElementById('sysOffset').checked;
+        const systemKey = isOffset ? 'offset' : 'gravure';
+        const matId = document.getElementById('materialSelect').value;
+        const matList = SALES_CONFIG.materials[systemKey];
+        const selectedMat = matList.find(m => m.id === matId) || matList[0];
+        
+        // Put default price into input
+        document.getElementById('materialPriceInput').value = selectedMat.price;
+        
+        // Show correct price unit (บ./แผ่น or บ./ม้วน)
+        document.getElementById('matPriceUnitText').textContent = `บ./${selectedMat.unit}`;
+        
         calculate();
     }
 
@@ -1419,6 +1420,11 @@
         const marginPercent = parseFloat(document.getElementById('customMargin').value) || 0;
         const matList = SALES_CONFIG.materials[systemKey];
         const selectedMat = matList.find(m => m.id === matId) || matList[0];
+        
+        // Use custom price input if edited, else default
+        const matPriceInputVal = parseFloat(document.getElementById('materialPriceInput').value);
+        const selectedPrice = !isNaN(matPriceInputVal) ? matPriceInputVal : selectedMat.price;
+        
         const prodRates = SALES_CONFIG.productionRates[systemKey];
         
         const moldCost = colors * (isOffset ? prodRates.plateCostPerColor : prodRates.cylinderCostPerColor);
@@ -1445,10 +1451,10 @@
             const fitL = Math.floor(selectedMat.lengthCm / l) || 1;
             const fitPerSheet = fitW * fitL;
             const sheetsNeeded = Math.ceil(qty / fitPerSheet);
-            matCost = sheetsNeeded * selectedMat.price;
+            matCost = sheetsNeeded * selectedPrice; // Use editable/custom price!
         } else {
             const rollsNeeded = totalMetersUsed / selectedMat.rollMeters;
-            matCost = rollsNeeded * selectedMat.price;
+            matCost = rollsNeeded * selectedPrice; // Use editable/custom price!
         }
         let inkCost = 0;
         if (isOffset) {
@@ -1518,9 +1524,9 @@
             totalMetersUsed,
             materialName: selectedMat.name
         };
-      }
+    }
 
-      function calculate() {
+    function calculate() {
         const isOffset = document.getElementById('sysOffset').checked;
         const calc = calculateCostForVolume();
 
@@ -1678,16 +1684,6 @@ ${contactStr}📏 **ขนาด:** ${w} x ${l} ซม. | **จำนวน:** $
             subElem.innerHTML = originalSub;
         }, 500);
     }
-
-    // Tab Navigation setup
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById(btn.dataset.tab).classList.add('active');
-        });
-    });
 
     window.onload = function() {
         loadSavedTheme();
